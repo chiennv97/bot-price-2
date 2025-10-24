@@ -12,5 +12,5 @@ jobs:
     steps:
       - name: Call Monitor API
         run: |
-          curl -X POST "${{ secrets.VERCEL_URL }}/api/thala-monitor" \
+          curl -X POST "https://bot-price-2.vercel.app/api/thala-monitor" \
             -H "Content-Type: application/json"
