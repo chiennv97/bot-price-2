@@ -8,6 +8,10 @@ interface ThalaPoolData {
     totalLiquidity?: string;
     volume24h?: string;
     apr?: string;
+    data?: {
+        price?: number;
+        [key: string]: unknown;
+    };
     [key: string]: unknown;
 }
 
@@ -94,22 +98,41 @@ async function fetchThalaData(): Promise<ThalaPoolData | null> {
     }
 }
 
+function shouldSendNotification(data: ThalaPoolData): boolean {
+    // Kiểm tra nếu data.data.price <= 1.0002 hoặc >= 1.0006 thì bắn noti
+    console.log('Price:', data?.data);
+    const price = (data?.data as any)?.metadata?.price;
+
+    if (price === undefined || price === null) {
+        console.log('Price not found in data, skipping notification');
+        return false;
+    }
+
+    // const shouldNotify = price <= 1.0002 || price >= 1.0006;
+    const shouldNotify = price <= 1.0002 || price >= 1.0003;
+
+
+    if (shouldNotify) {
+        console.log(`Price ${price} is within notification range (<= 1.0002 or >= 1.0006)`);
+    } else {
+        console.log(`Price ${price} is outside notification range, skipping notification`);
+    }
+
+    return shouldNotify;
+}
+
 function formatMessage(data: ThalaPoolData): string {
     const timestamp = new Date().toISOString();
 
     // Tùy chỉnh format message dựa trên cấu trúc data từ API
-    let message = `🔄 **Thala Pool Update** - ${timestamp}\n\n`;
+    let message = "";
 
     // Thêm các thông tin quan trọng từ pool data
     if (data) {
-        message += `📊 **Pool Data:**\n`;
-        message += `• Pool Type: ${data.poolType || 'N/A'}\n`;
-        message += `• Total Liquidity: ${data.totalLiquidity || 'N/A'}\n`;
-        message += `• Volume 24h: ${data.volume24h || 'N/A'}\n`;
-        message += `• APR: ${data.apr || 'N/A'}\n`;
+        message += `📊 **Price Data:**\n`;
+        message += `• Current Price: ${(data.data as any)?.metadata?.price || 'N/A'}\n`;
 
-        // Thêm raw data để debug
-        message += `\n📋 **Raw Data:**\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``;
+
     } else {
         message += `❌ **Error:** Failed to fetch pool data`;
     }
@@ -125,21 +148,32 @@ export async function POST() {
         const poolData = await fetchThalaData();
 
         if (poolData) {
-            // Format message
-            const message = formatMessage(poolData);
+            // Kiểm tra điều kiện price trước khi gửi notification
+            if (shouldSendNotification(poolData)) {
+                // Format message
+                const message = formatMessage(poolData);
 
-            // Gửi đến Discord và Telegram
-            await Promise.all([
-                sendToDiscord(message),
-                sendToTelegram(message)
-            ]);
+                // Gửi đến Discord và Telegram
+                await Promise.all([
+                    sendToDiscord(message),
+                    sendToTelegram(message)
+                ]);
 
-            return NextResponse.json({
-                success: true,
-                message: 'Data fetched and notifications sent successfully',
-                data: poolData,
-                timestamp: new Date().toISOString()
-            });
+                return NextResponse.json({
+                    success: true,
+                    message: 'Data fetched and notifications sent successfully',
+                    data: poolData,
+                    timestamp: new Date().toISOString()
+                });
+            } else {
+                // Price không thỏa mãn điều kiện, không gửi notification
+                return NextResponse.json({
+                    success: true,
+                    message: 'Data fetched but price condition not met, no notifications sent',
+                    data: poolData,
+                    timestamp: new Date().toISOString()
+                });
+            }
         } else {
             const errorMessage = `❌ **Thala Monitor Error** - ${new Date().toISOString()}\n\nFailed to fetch pool data from Thala API`;
 
