@@ -158,7 +158,7 @@ export async function POST() {
 
                 // Gửi đến Discord và Telegram
                 await Promise.all([
-                    sendToDiscord(message),
+                    // sendToDiscord(message),
                     sendToTelegram(message)
                 ]);
 
@@ -181,7 +181,7 @@ export async function POST() {
             const errorMessage = `❌ **Thala Monitor Error** - ${new Date().toISOString()}\n\nFailed to fetch pool data from Thala API`;
 
             await Promise.all([
-                sendToDiscord(errorMessage),
+                // sendToDiscord(errorMessage),
                 sendToTelegram(errorMessage)
             ]);
 
@@ -197,7 +197,7 @@ export async function POST() {
         const errorMessage = `❌ **Thala Monitor Error** - ${new Date().toISOString()}\n\nError: ${error instanceof Error ? error.message : 'Unknown error'}`;
 
         await Promise.all([
-            sendToDiscord(errorMessage),
+            // sendToDiscord(errorMessage),
             sendToTelegram(errorMessage)
         ]);
 
