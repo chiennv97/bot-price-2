@@ -1,0 +1,16 @@
+name: Price Monitor
+
+on:
+  schedule:
+    # Run every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Monitor API
+        run: |
+          curl -X POST "${{ secrets.VERCEL_URL }}/api/thala-monitor" \
+            -H "Content-Type: application/json"
