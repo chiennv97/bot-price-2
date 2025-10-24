@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         console.log('Cron job triggered at:', new Date().toISOString());
 
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST() {
     // Cũng hỗ trợ POST method
-    return GET(request);
+    return GET();
 }

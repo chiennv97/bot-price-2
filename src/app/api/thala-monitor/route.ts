@@ -1,10 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const THALA_API_URL = 'https://app.thala.fi/api/liquidity-pool?pool-type=0xfec90c113a5093bde30a7927f608fb41d6f56e00d2f944242de6c75c1732503f';
 
 interface ThalaPoolData {
     // Định nghĩa interface dựa trên response từ API
-    [key: string]: any;
+    poolType?: string;
+    totalLiquidity?: string;
+    volume24h?: string;
+    apr?: string;
+    [key: string]: unknown;
 }
 
 async function sendToDiscord(message: string) {
@@ -113,7 +117,7 @@ function formatMessage(data: ThalaPoolData): string {
     return message;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST() {
     try {
         console.log('Thala monitor API called at:', new Date().toISOString());
 
@@ -169,7 +173,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Thêm GET method để test
-export async function GET(request: NextRequest) {
+export async function GET() {
     return NextResponse.json({
         message: 'Thala Monitor API is running',
         timestamp: new Date().toISOString(),
