@@ -10,6 +10,10 @@ interface ThalaPoolData {
     apr?: string;
     data?: {
         price?: number;
+        metadata?: {
+            price?: number;
+            [key: string]: unknown;
+        };
         [key: string]: unknown;
     };
     [key: string]: unknown;
@@ -101,7 +105,7 @@ async function fetchThalaData(): Promise<ThalaPoolData | null> {
 function shouldSendNotification(data: ThalaPoolData): boolean {
     // Kiểm tra nếu data.data.price <= 1.0002 hoặc >= 1.0006 thì bắn noti
     console.log('Price:', data?.data);
-    const price = (data?.data as any)?.metadata?.price;
+    const price = data?.data?.metadata?.price;
 
     if (price === undefined || price === null) {
         console.log('Price not found in data, skipping notification');
@@ -122,7 +126,6 @@ function shouldSendNotification(data: ThalaPoolData): boolean {
 }
 
 function formatMessage(data: ThalaPoolData): string {
-    const timestamp = new Date().toISOString();
 
     // Tùy chỉnh format message dựa trên cấu trúc data từ API
     let message = "";
@@ -130,7 +133,7 @@ function formatMessage(data: ThalaPoolData): string {
     // Thêm các thông tin quan trọng từ pool data
     if (data) {
         message += `📊 **Price Data:**\n`;
-        message += `• Current Price: ${(data.data as any)?.metadata?.price || 'N/A'}\n`;
+        message += `• Current Price: ${data.data?.metadata?.price || 'N/A'}\n`;
 
 
     } else {
