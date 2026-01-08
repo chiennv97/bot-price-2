@@ -113,7 +113,7 @@ function shouldSendNotification(data: ThalaPoolData): boolean {
     }
 
     // const shouldNotify = false;
-    const shouldNotify = price <= 0.9990 || price >= 0.9992
+    const shouldNotify = price <= 0.9988 || price >= 0.9990
 
 
     if (shouldNotify) {
